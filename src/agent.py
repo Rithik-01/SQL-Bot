@@ -1,6 +1,6 @@
 from tools.db_con import run_multiple_query
-from tools.sql_generater import nl_to_sql
-from tools.pandas_ai import chat_with_df
+from src.tools.query_generater import nl_to_sql
+from src.tools.visualizer import chat_with_df
 from llm.client import ask_gemini
 
 def classify_query(input:str)->str:
@@ -40,17 +40,4 @@ def agent(user_input:str):
         return df
     
     return chat_with_df(df, user_input)
-    
-
-
-
-
-
-
-
-
-
-
-
-
     

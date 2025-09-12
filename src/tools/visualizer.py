@@ -40,4 +40,3 @@ def chat_with_df(df: pd.DataFrame, question: str):
     except Exception as e:
         return f"⚠️ Error executing code: {e}"
 
-
