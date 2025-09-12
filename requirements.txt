@@ -2,8 +2,4 @@ mysql-connector-python
 google-generativeai
 streamlit
 streamlit_mic_recorder
-psycopg2-binary
 groq
-langchain
-langchain_google_genai
-langgraph
