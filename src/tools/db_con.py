@@ -1,6 +1,6 @@
 import mysql.connector
 import pandas as pd
-from src.config import DB_NAME,DB_HOST,DB_PASSWORD, DB_USER
+from config import DB_NAME,DB_HOST,DB_PASSWORD, DB_USER
 
 def get_connection():
     """Create and return a MySQL DB connection."""

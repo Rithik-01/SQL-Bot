@@ -1,8 +1,7 @@
-from src.tools.db_con import run_multiple_query
-from src.tools.sql_generater import nl_to_sql
-from src.tools.pandas_ai import chat_with_df
-import pandas as pd
-from src.llm.client import ask_gemini
+from tools.db_con import run_multiple_query
+from tools.sql_generater import nl_to_sql
+from tools.pandas_ai import chat_with_df
+from llm.client import ask_gemini
 
 def classify_query(input:str)->str:
     """ classify the user input whether related to Visualization or Not"""
@@ -39,6 +38,7 @@ def agent(user_input:str):
     # Step 4: return either raw DataFrame or chart
     if classification == "no":
         return df
+    
     return chat_with_df(df, user_input)
     
 

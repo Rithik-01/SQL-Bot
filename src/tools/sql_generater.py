@@ -1,5 +1,5 @@
-from src.tools.db_con import get_schema_description
-from src.llm.client import ask_gemini
+from tools.db_con import get_schema_description
+from llm.client import ask_gemini
 
 
 def nl_to_sql(visualization:str,user_input: str) -> str:

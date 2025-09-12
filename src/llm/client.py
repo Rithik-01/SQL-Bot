@@ -1,5 +1,5 @@
 import google.generativeai as genai
-from src.config import GEMINI_API_KEY,GROQ_API_KEY
+from config import GEMINI_API_KEY,GROQ_API_KEY
 from groq import Groq
 
 def ask_groq(prompt:str)->str:
@@ -16,9 +16,10 @@ def ask_groq(prompt:str)->str:
 
 def ask_gemini(prompt:str)-> str:
     """Send a natural language query to gemini and get back a response."""
+
     genai.configure(api_key=GEMINI_API_KEY)
-    llm1 = genai.GenerativeModel("gemini-2.5-flash")
-    response = llm1.generate_content(prompt)
+    llm = genai.GenerativeModel("gemini-2.5-flash")
+    response = llm.generate_content(prompt)
 
     return response.text.strip()
 

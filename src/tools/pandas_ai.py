@@ -1,5 +1,5 @@
 import pandas as pd
-from src.llm.client import ask_gemini
+from llm.client import ask_gemini
 
 
 def chat_with_df(df: pd.DataFrame, question: str):
