@@ -4,7 +4,7 @@ from src.llm.client import ask_gemini
 
 def chat_with_df(df: pd.DataFrame, question: str):
     """Convert natural language question into a Python/Pandas query via LLM, then execute it."""
-    # Provide schema + few rows as context
+    
     context = f"""
         You are a Python data analyst expert. 
         your work is to write python code to do visualization using matplotlib,seaborn libraries.

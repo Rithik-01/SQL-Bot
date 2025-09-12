@@ -1,5 +1,5 @@
 import streamlit as st
-from src.tools.db import get_tables,get_columns
+from src.tools.db_con import get_tables,get_columns
 from src.config import DB_NAME
 from streamlit_mic_recorder import speech_to_text
 from src.agent import agent

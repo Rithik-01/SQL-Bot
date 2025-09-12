@@ -1,50 +1,49 @@
-from src.tools.db import get_schema_description
+from src.tools.db_con import get_schema_description
 from src.llm.client import ask_gemini
 
 
 def nl_to_sql(visualization:str,user_input: str) -> str:
-    """Convert natural language command into SQL using Gemini 1.5 Flash."""
+    """ Convert a natural language query into a valid MySQL 8.0 SQL query using Gemini. """
+
     schema = get_schema_description()
 
-    prompt_db_o= f"""
+    # Base template
+    base_prompt = f"""
     You are a SQL generator for MySQL 8.0.
     Use the following database schema to write valid MySQL queries.
-    Schema:{schema}
+    Schema: {schema}
 
     Return **only one** valid SQL statement for the instruction below.
     DO NOT include markdown code fences, backticks, comments, prose, or explanations.
     Instruction: {user_input}
-
-    if the query is not going to return any data and it does changes to the database. write a query followed by it to display the changes.
-    example:input="delete column text1 in fitness table"
-    ALTER TABLE fitness.users DROP COLUMN test1;
-    SELECT * FROM fitness.users;
-
     """
-    prompt_v=f"""
-         You are a SQL generator for MySQL 8.0.
-    Use the following database schema to write valid MySQL queries.
-    Schema:{schema}
 
-    Return **only one** valid SQL statement for the instruction below.
-    DO NOT include markdown code fences, backticks, comments, prose, or explanations.
-    user_input: {user_input}
+    # Specialized instructions
+    if visualization == "yes":
+        extra_instructions = """
+        Important: Select only the columns necessary for the requested visualization.
 
-    important=you should select columns that are necessary for the user asked vistalization technique.
-    example:input="show distribution of salary above the age of 40"
-    excepted output=SELECT age,salary FROM employees;
+        Example:
+        input="show distribution of salary above the age of 40"
+        expected output=SELECT age, salary FROM employees;
+        """
+    else:
+        extra_instructions = """
+        If the query modifies the database (INSERT, UPDATE, DELETE, ALTER, etc.),
+        follow it with a SELECT statement that displays the modified data.
 
-    """
-    if visualization=='yes':
-        prompt=prompt_v
-    else :
-        prompt=prompt_db_o
+        Example:
+        input="delete column text1 in fitness table"
+        output:
+        ALTER TABLE fitness.users DROP COLUMN test1;
+        SELECT * FROM fitness.users;
+        """
 
-    print(prompt)
-    
+    # Combine prompt
+    prompt = base_prompt + "\n" + extra_instructions
+
+    # Call Gemini
     response = ask_gemini(prompt)
 
-    print(response)
-    
-    return response
+    return response.strip()
    
