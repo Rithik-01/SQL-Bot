@@ -67,10 +67,50 @@ def run_query(query: str):
     conn.close()
     return None
 
+def get_table_details():
+    
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    tables=get_tables()
+    
+    database_schema = {
+        "database": conn.database,
+        "tables": []
+    }
+    for table in tables:
+        
+        table_info = {"name": table, "columns": []}
+
+        cursor.execute(f"""
+            SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_SCHEMA = '{conn.database}'
+            AND TABLE_NAME = '{table}';
+        """)
+        columns = cursor.fetchall()
+
+        cursor.execute(f"SELECT * FROM {table} LIMIT 1;")
+        rows = cursor.fetchall()
+
+        for col in columns:
+            table_info["columns"].append({
+                "name": col["COLUMN_NAME"],
+                "type": col["COLUMN_TYPE"],
+                "ex_data":rows[0][col["COLUMN_NAME"]]
+            })
+
+        table_info["sample_rows"] = rows
+        database_schema["tables"].append(table_info)
+
+    conn.commit()
+    conn.close()
+    return database_schema
+
 def run_multiple_query(query:str)-> pd.DataFrame:
     """Execute one or more SQL queries on the DB."""
     conn = get_connection()
-    results = []
+    df = None
 
     with conn.cursor() as cursor:
         cursor.execute(query, map_results=True)
@@ -79,9 +119,9 @@ def run_multiple_query(query:str)-> pd.DataFrame:
             if result_set: 
                 columns = [desc[0] for desc in cursor.description]
                 df = pd.DataFrame(result_set, columns=columns)
-                results.append(df)
+                
 
     conn.commit()
     conn.close()
 
-    return results[0]
+    return df

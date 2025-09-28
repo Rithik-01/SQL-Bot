@@ -1,5 +1,6 @@
 import pandas as pd
 from llm.client import ask_gemini
+from matplotlib.axes import Axes
 
 
 def chat_with_df(df: pd.DataFrame, question: str):
@@ -24,6 +25,7 @@ def chat_with_df(df: pd.DataFrame, question: str):
         -import necessary libaries include pandas
         -you should not create dataframe as it already 'df' is exist
         -take care of the datatype of the data in the dataframe
+        -don't normalize the numerical value should show the original valuse in the chart.
         -avoid ```python ``` this wrappe on code
          
     """
@@ -36,7 +38,12 @@ def chat_with_df(df: pd.DataFrame, question: str):
     try:
         exec(code, {}, local_vars)
         result = local_vars.get("result", None)
-        return result
+
+        if isinstance(result, Axes):
+            fig = result.get_figure()
+        else:
+            fig = result
+        return fig
+    
     except Exception as e:
         return f"⚠️ Error executing code: {e}"
-

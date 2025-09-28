@@ -1,5 +1,5 @@
 import streamlit as st
-from tools.db_con import get_tables,get_columns
+from tools.db_connection import get_tables,get_columns
 from config import DB_NAME
 from streamlit_mic_recorder import speech_to_text
 from agent import agent
@@ -25,13 +25,12 @@ if tables:
 else:
     st.sidebar.warning("No tables found in this database.")
 
-# --- Voice input ---
 
 if "user_input" not in st.session_state:
     st.session_state["user_input"] = ""
 
 st.subheader("Enter your command")
-# --- Text input (fallback) ---
+
 typed_input = st.text_area(
     "",
     width=800,
@@ -60,11 +59,12 @@ elif typed_input.strip():
 if st.button("Execute"):
     if st.session_state["user_input"].strip():
         try:
-            result=agent(st.session_state["user_input"])
+            result,visualize = agent(st.session_state["user_input"])
 
-            if isinstance(result, pd.DataFrame):
+            if visualize=='no':
                 st.success("✅ Query executed successfully. Result available.",width=400)
-                st.dataframe(result)
+                if result is not None and not result.empty:
+                    st.dataframe(result)
             else:
                 st.success("✅ Query executed successfully. Result available.",width=400)
                 st.pyplot(result,width=700)
