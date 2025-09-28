@@ -1,17 +1,5 @@
 import google.generativeai as genai
-from config import GEMINI_API_KEY,GROQ_API_KEY
-from groq import Groq
-
-def ask_groq(prompt:str)->str:
-    """Send a natural language query to Groq and get back a response."""
-
-    client = Groq(api_key=GROQ_API_KEY)
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0
-    )
-    return response.choices[0].message.content.strip()
+from config import GEMINI_API_KEY
 
 
 def ask_gemini(prompt:str)-> str:

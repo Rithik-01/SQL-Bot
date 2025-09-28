@@ -1,6 +1,5 @@
 from tools.db_connection import get_schema_description,get_table_details
 from llm.client import ask_gemini
-from config import DB_DESCRIPTION
 
 
 def nl_to_sql(visualization:str,user_input: str) -> str:
@@ -13,14 +12,14 @@ def nl_to_sql(visualization:str,user_input: str) -> str:
     base_prompt = f"""
     You are a SQL generator for MySQL 8.0.
     Use the following database schema to write valid MySQL queries.
-    Schema: {schema}
-    Table description:{DB_DESCRIPTION}
-    Table details:{table_details}
+
+    Schema: { schema }
+    Table details:{ table_details }
 
 
     Return **only one** valid SQL statement for the instruction below.
     DO NOT include markdown code fences, backticks, comments, prose, or explanations.
-    Instruction: {user_input}
+    Instruction: { user_input }
     """
 
     # Specialized instructions
