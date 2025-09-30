@@ -23,7 +23,7 @@ def nl_to_sql(visualization:str,user_input: str) -> str:
     """
 
     # Specialized instructions
-    if visualization == "yes":
+    if visualization.strip() == "yes":
         extra_instructions = """
         Important: Select only the columns necessary for the requested visualization.
 
@@ -54,5 +54,6 @@ def nl_to_sql(visualization:str,user_input: str) -> str:
     # Call Gemini
     response = ask_gemini(prompt)
     
+    print(response)
     
     return response.strip()
