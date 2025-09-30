@@ -1,6 +1,7 @@
 import pandas as pd
 from llm.client import ask_gemini
 from matplotlib.axes import Axes
+import matplotlib as plt
 
 
 def chat_with_df(df: pd.DataFrame, question: str):
@@ -39,11 +40,14 @@ def chat_with_df(df: pd.DataFrame, question: str):
         exec(code, {}, local_vars)
         result = local_vars.get("result", None)
 
-        if isinstance(result, Axes):
+        if isinstance(result, plt.Axes):
             fig = result.get_figure()
-        else:
+        # If result is Figure, use it
+        elif isinstance(result, plt.Figure):
             fig = result
-        return fig
+        else:
+            # fallback: create a blank Figure to prevent errors
+            fig = plt.figure()
     
     except Exception as e:
         return f"⚠️ Error executing code: {e}"
