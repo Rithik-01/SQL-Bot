@@ -1,34 +1,27 @@
-import mysql.connector
 import pandas as pd
-from config import DB_NAME,DB_HOST,DB_PASSWORD, DB_USER
+from sqlalchemy import create_engine,text
+from config import DB_URL
 
 def get_connection():
     """Create and return a MySQL DB connection."""
-    return mysql.connector.connect(
-        host=DB_HOST,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        database=DB_NAME
-    )
+    return create_engine(DB_URL)
 
 def get_tables():
     """Return a list of all tables in the database."""
     conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SHOW TABLES")
-    tables = [row[0] for row in cursor.fetchall()]
+    cursor = conn.connect()
+    result=cursor.execute(text("SHOW TABLES"))
+    tables = [row[0] for row in result]
     cursor.close()
-    conn.close()
     return tables
 
 def get_columns(table_name: str):
     """Return all columns for a given table."""
     conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(f"SHOW COLUMNS FROM {table_name}")
-    cols = [row[0] for row in cursor.fetchall()]
+    cursor = conn.connect()
+    result=cursor.execute(text(f"SHOW COLUMNS FROM {table_name}"))
+    cols = [row[0] for row in result]
     cursor.close()
-    conn.close()
     return cols
 
 def get_schema_description():
@@ -50,76 +43,57 @@ def is_safe_query(query: str) -> bool:
             return False
     return True
 
-def run_query(query: str):
-    """Execute a SQL query on the DB."""
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(query , multi=True)
-
-    if query.strip().lower().startswith("select"):
-        rows = cursor.fetchall()
-        columns = [desc[0] for desc in cursor.description]
-        conn.close()
-        return pd.DataFrame(rows, columns=columns)
-    
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return None
 
 def get_table_details():
+    """Fetch tables, columns, and sample rows from the database using SQLAlchemy."""
     
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    engine = get_connection()
+    database_schema = {"database": engine.url.database, "tables": []}
 
-    tables=get_tables()
-    
-    database_schema = {
-        "database": conn.database,
-        "tables": []
-    }
-    for table in tables:
-        
-        table_info = {"name": table, "columns": []}
+    # Get list of tables
+    tables = get_tables()  
 
-        cursor.execute(f"""
-            SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_SCHEMA = '{conn.database}'
-            AND TABLE_NAME = '{table}';
-        """)
-        columns = cursor.fetchall()
+    with engine.connect() as conn:
+        for table in tables:
+            table_info = {"name": table, "columns": []}
 
-        cursor.execute(f"SELECT * FROM {table} LIMIT 1;")
-        rows = cursor.fetchall()
+            # Get column info
+            col_query = text(f"""
+                SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = :db
+                AND TABLE_NAME = :table;
+            """)
+            columns = conn.execute(col_query, {"db": engine.url.database, "table": table}).fetchall()
 
-        for col in columns:
-            table_info["columns"].append({
-                "name": col["COLUMN_NAME"],
-                "type": col["COLUMN_TYPE"],
-                "ex_data":rows[0][col["COLUMN_NAME"]]
-            })
+            # Get one sample row
+            sample_query = text(f"SELECT * FROM {table} LIMIT 1;")
+            rows = pd.read_sql(sample_query, conn)
 
-        table_info["sample_rows"] = rows
-        database_schema["tables"].append(table_info)
+            # Build column details
+            for col in columns:
+                example_value = rows.iloc[0][col.COLUMN_NAME] if not rows.empty else None
+                table_info["columns"].append({
+                    "name": col.COLUMN_NAME,
+                    "type": col.COLUMN_TYPE,
+                    "ex_data": example_value
+                })
 
-    conn.commit()
-    conn.close()
+            table_info["sample_rows"] = rows.to_dict(orient="records")
+            database_schema["tables"].append(table_info)
+
     return database_schema
+
 
 def run_multiple_query(query:str)-> pd.DataFrame:
     """Execute one or more SQL queries on the DB."""
-    conn = get_connection()
+    engine = get_connection()  
+    conn = engine.connect()    
     df = None
 
-    with conn.cursor() as cursor:
-        cursor.execute(query, map_results=True)
-
-        for statement, result_set in cursor.fetchsets():
-            if result_set: 
-                columns = [desc[0] for desc in cursor.description]
-                df = pd.DataFrame(result_set, columns=columns)
-                
+    result = conn.execute(text(query))
+    if result.returns_rows:
+            df = pd.DataFrame(result.fetchall(), columns=result.keys())
 
     conn.commit()
     conn.close()

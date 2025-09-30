@@ -1,4 +1,5 @@
-mysql-connector-python
 google-generativeai
 streamlit
 streamlit_mic_recorder
+sqlalchemy 
+pymysql 
