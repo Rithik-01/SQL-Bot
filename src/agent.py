@@ -49,5 +49,7 @@ def agent(user_input:str):
     if classification.strip() == "no":
         return df,classification
     
-    return chat_with_df(df, user_input),classification
+    result=chat_with_df(df, user_input)
+
+    return result,classification
     
