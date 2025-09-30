@@ -59,7 +59,8 @@ elif typed_input.strip():
 if st.button("Execute"):
     if st.session_state["user_input"].strip():
         try:
-            result,visualize = agent(st.session_state["user_input"])
+            with st.spinner("⏳ Running your query and generating results..."):
+                result,visualize = agent(st.session_state["user_input"])
 
             if visualize=='no':
                 st.success("✅ Query executed successfully. Result available.",width=400)
