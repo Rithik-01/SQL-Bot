@@ -4,3 +4,5 @@ streamlit_mic_recorder
 sqlalchemy 
 pymysql 
 python-dotenv
+matplotlib
+pandas
