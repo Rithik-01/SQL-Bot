@@ -1,8 +1,8 @@
 import pandas as pd
 from llm.client import ask_gemini
 from matplotlib.axes import Axes
-import matplotlib as plt
-
+import matplotlib.pyplot as plt
+import asyncio
 
 def chat_with_df(df: pd.DataFrame, question: str):
     """Convert natural language question into a Python/Pandas query via LLM, then execute it."""
@@ -37,17 +37,20 @@ def chat_with_df(df: pd.DataFrame, question: str):
 
     local_vars = {"df": df}
     try:
+        print("entered exec code")
         exec(code, {}, local_vars)
+        print("to fetch result value")
         result = local_vars.get("result", None)
+        print("got the result values")
+        print(type(result))
 
-        if isinstance(result, plt.Axes):
+        if isinstance(result, plt.Figure):
+            return result
+        elif isinstance(result, plt.Axes):
             fig = result.get_figure()
-        # If result is Figure, use it
-        elif isinstance(result, plt.Figure):
-            fig = result
-        else:
-            # fallback: create a blank Figure to prevent errors
-            fig = plt.figure()
-    
+            return fig
+        
+        print("result show")
+        return result
     except Exception as e:
         return f"⚠️ Error executing code: {e}"

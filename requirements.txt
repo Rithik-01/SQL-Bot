@@ -6,3 +6,4 @@ pymysql
 python-dotenv
 matplotlib
 pandas
+asyncio

@@ -3,6 +3,7 @@ from tools.query_generater import nl_to_sql
 from tools.visualizer import chat_with_df
 from llm.client import ask_gemini
 import pandas as pd
+import asyncio
 
 def classify_query(input:str)->str:
     """ classify the user input whether related to Visualization or Not"""
@@ -26,7 +27,7 @@ def classify_query(input:str)->str:
     return responce
 
 
-def agent(user_input:str):
+def agent(user_input:str) :
     """
     Main agent function that processes a natural language query, 
     determines its intent, and returns either raw query results 
@@ -49,7 +50,7 @@ def agent(user_input:str):
     if classification.strip() == "no":
         return df,classification
     
-    result=chat_with_df(df, user_input)
+    result = chat_with_df(df, user_input)
 
     return result,classification
     
