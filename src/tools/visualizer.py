@@ -53,4 +53,5 @@ def chat_with_df(df: pd.DataFrame, question: str):
         print("result show")
         return result
     except Exception as e:
+        print(e)
         return f"⚠️ Error executing code: {e}"

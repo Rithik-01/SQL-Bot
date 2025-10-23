@@ -10,7 +10,7 @@ def nl_to_sql(visualization:str,user_input: str) -> str:
 
     # Base template
     base_prompt = f"""
-    You are a SQL generator for MySQL 8.0.
+    You are a SQL generator for MariaDB (MySQL-compatible) .
     Use the following database schema to write valid MySQL queries.
 
     Schema: { schema }
