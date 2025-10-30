@@ -1,10 +1,20 @@
 import pandas as pd
 from sqlalchemy import create_engine,text
 from config import DB_URL
+import pymysql
+pymysql.install_as_MySQLdb()
 
 def get_connection():
     """Create and return a MySQL DB connection."""
-    return create_engine(DB_URL)
+    return create_engine(
+    DB_URL,
+    pool_pre_ping=True,
+    pool_recycle=1800,
+    connect_args={
+        "connect_timeout": 30,
+        "ssl": {"fake_flag_to_enable_tls": True}  # enable SSL if required
+    }
+    )
 
 def get_tables():
     """Return a list of all tables in the database."""

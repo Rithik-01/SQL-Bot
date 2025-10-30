@@ -8,3 +8,4 @@ matplotlib
 pandas
 asyncio
 seaborn
+cryptography
