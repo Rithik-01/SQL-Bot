@@ -4,6 +4,7 @@ from config import DB_URL
 import pymysql
 pymysql.install_as_MySQLdb()
 
+
 def get_connection():
     """Create and return a MySQL DB connection."""
     return create_engine(
